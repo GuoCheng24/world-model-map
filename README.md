@@ -1,0 +1,131 @@
+# world-model-map
+
+**A researcher's map of open-source world models — what exists, what each line of work actually claims, and where its authors say it breaks.**
+
+<p align="center">
+  <img src="docs/map.png" width="100%">
+</p>
+
+There are plenty of awesome-lists for world models. This is not one. A link and a one-line abstract tell you a paper exists; they do not tell you whether the method works on your problem, or what its authors already know is wrong with it.
+
+So this map records something different: **the limitations the authors wrote down themselves**. That information is real, load-bearing, and almost impossible to find — it sits in section 4.3, or an appendix, or a single sentence in the discussion.
+
+---
+
+## Evidence levels
+
+Everything here is marked with how far it was actually read. Nothing is summarised from a title.
+
+| mark | meaning |
+|---|---|
+| 📖 | full text read, including the limitations section |
+| 📄 | abstract and metadata only — treat claims as unverified |
+
+Every citation was checked against OpenAlex/Crossref/arXiv with [`scholarcheck`](https://github.com/GuoCheng24/scholarcheck), so the DOIs resolve and the papers exist.
+
+---
+
+## The open models
+
+Repository state as of 2026-08-19. **Last push matters**: three of the best-known repositories have not been touched in over a year.
+
+| repo | ★ | license | last push | what it is |
+|---|---|---|---|---|
+| [NVIDIA/cosmos](https://github.com/NVIDIA/cosmos) | 11551 | see repo | 2026-08-18 | action-conditioned video generation as a world model |
+| [facebookresearch/vjepa2](https://github.com/facebookresearch/vjepa2) | 4482 | **MIT** | 2026-03-23 | V-JEPA 2 / V-JEPA 2-AC — latent video prediction + action-conditioned planning |
+| [facebookresearch/jepa](https://github.com/facebookresearch/jepa) | 4094 | see repo | 2025-02-27 | V-JEPA 1 — *no longer updated* |
+| [danijar/dreamerv3](https://github.com/danijar/dreamerv3) | 3683 | **MIT** | 2026-05-25 | recurrent latent world model, one hyperparameter set across domains |
+| [facebookresearch/ijepa](https://github.com/facebookresearch/ijepa) | 3487 | see repo | 2024-05-08 | I-JEPA — image JEPA, *no longer updated* |
+| [eloialonso/diamond](https://github.com/eloialonso/diamond) | 2091 | **MIT** | 2024-12-06 | diffusion world model, *no longer updated* |
+| [nicklashansen/tdmpc2](https://github.com/nicklashansen/tdmpc2) | 925 | **MIT** | 2026-07-13 | implicit world model + local trajectory optimisation |
+| [gaoyuezhou/dino_wm](https://github.com/gaoyuezhou/dino_wm) | 551 | **MIT** | 2025-03-24 | world model on frozen DINO features, zero-shot planning |
+
+---
+
+## What the authors say breaks
+
+This is the part you cannot get from an abstract.
+
+### V-JEPA 2 📖 — [arXiv:2506.09985](https://arxiv.org/abs/2506.09985)
+
+Two limitations, stated in §4.3:
+
+**Camera position is load-bearing, and the problem is ill-posed.** V-JEPA 2-AC predicts the next frame's representation given an end-effector Cartesian action, *without camera calibration*. It therefore has to infer the action coordinate axis from monocular RGB — but the robot base is often outside the frame, so, in the authors' words, "the problem of inferring the action coordinate axis is not well defined, leading to errors in the world model." They report having **manually tried several camera positions** before settling on one that worked. A quantitative sensitivity analysis is in their Appendix B.4.
+
+**Long-horizon planning is not solved, and the paper's own numbers show it.** Autoregressive rollout accumulates error — prediction accuracy falls as the rollout lengthens — and the action search space grows exponentially with horizon. Their planning results (Table 3) are run at **horizon = 1**. The efficiency win over a diffusion-based video world model is nonetheless large: 16 seconds per action versus 4 minutes.
+
+### DINO-WM 📖 — [arXiv:2411.04983](https://arxiv.org/abs/2411.04983)
+
+Three, stated together:
+
+- needs **offline data with sufficient state-action coverage**, hard to obtain in complex environments;
+- still requires **ground-truth actions**, which internet-scale video does not have;
+- plans **in action space only** — no hierarchy between high-level planning and low-level control.
+
+### TD-MPC2 📖 — [arXiv:2310.16828](https://arxiv.org/abs/2310.16828)
+
+Names the shortcoming of **local** trajectory optimisation explicitly, and mitigates it by bootstrapping returns beyond the planning horizon with a learned terminal value function — a partial fix, not a solution.
+
+### DreamerV3 📖 — [arXiv:2301.04104](https://arxiv.org/abs/2301.04104)
+
+**No explicit limitations section.** Recorded here because its absence is itself information: the robustness claim is "one hyperparameter set across domains", and the paper does not enumerate where that breaks.
+
+---
+
+## Lines of work on the open problems
+
+Grouped by *what they change*, which is what decides whether you can adopt one without retraining.
+
+### 1. When can a rollout be trusted?
+
+The oldest and most-cited line, and still open.
+
+- **MBPO** 📖 — [arXiv:1906.08253](https://arxiv.org/abs/1906.08253). Theorem 4.1 bounds true returns by model returns minus `C(ε_m, ε_π)`, where `ε_m` bounds the TV-distance between true and model transitions. The structure is sound; the catch is that **`ε_m` is not observable** and has to be estimated before the bound can be used.
+- **Acting upon Imagination** 📖 — [arXiv:2105.05716](https://arxiv.org/abs/2105.05716). Uses **ensemble variance** to decide when to re-plan. Heuristic; no coverage guarantee.
+- **Metric Non-Collapse in Learned World Models for Control** 📄 (2026) — advertises approximation theory and *finite-sample geometric guarantees*. Not yet read in full.
+
+*Open:* none of the above gives a **distribution-free, finite-sample** statement about a specific rollout at a specific horizon. Conformal methods are the obvious candidate; the non-trivial part is that rollout steps are **not exchangeable**, so textbook split conformal does not apply unmodified.
+
+### 2. Constraining the latent dynamics
+
+- **Koopman Dreamer** 📄 (2026, arXiv:2607.19719) — spectrally constrained deterministic latent dynamics, aimed at stable imagination.
+- **SD-GWM** 📄 (2026, arXiv:2608.0868) — structural dynamics graph world model with constrained rollout and calibration; explicitly positioned as a *verifiable substrate* rather than a better forecaster.
+
+*Requires retraining.* Adopting either means changing the training objective, not adding a module.
+
+### 3. Representation collapse
+
+The failure mode JEPA-style objectives are built to avoid, and where the theory is currently moving fastest.
+
+- **A Minimal Model of Representation Collapse: Frustration, Stop-Gradient, and Dynamics** 📄 (2026)
+- **Rectified LpJEPA: sparse and maximum-entropy representations** 📄 (2026)
+- **Gaussian Joint Embeddings for SSL** 📄 (2026)
+- **SimSiam** 📖 — [arXiv:2011.10566](https://arxiv.org/abs/2011.10566), the reference point for why stop-gradient alone prevents collapse.
+
+### 4. Geometry of the action–latent map
+
+Barely populated, and the V-JEPA 2 camera limitation lands squarely in it. If a model must infer the action coordinate frame from pixels, then **identifiability of that frame** is a precondition for the world model being correct at all — and the authors report it is not always well defined.
+
+*Open:* what conditions on the observation make the action frame identifiable, and can the map be estimated at test time rather than assumed.
+
+---
+
+## What this map deliberately does not do
+
+It does not rank methods, and it does not claim any of these directions will work. Several of the entries above are marked 📄 precisely because the honest thing to say is "the abstract claims this and I have not verified it."
+
+If you are looking for a starting point: **the limitations sections are where the open problems already are**, written down by the people who know the method best. That is the whole idea behind this file.
+
+## Contributing
+
+Corrections are welcome, especially:
+
+- a limitation stated by authors that is missing here;
+- an entry marked 📄 that you have read in full — send the section number;
+- a repository whose status has changed.
+
+Please cite the section or page. **Claims sourced from an abstract will be marked 📄**, whoever submits them.
+
+## License
+
+CC BY 4.0 — reuse with attribution.
