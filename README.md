@@ -52,6 +52,10 @@ The models below are downloadable and the licences are permissive, but the
 repositories assume you already know which checkpoint you want. This section is
 the part that is usually missing.
 
+<p align="center">
+  <img src="docs/deploy.png" width="100%">
+</p>
+
 ### Which one do you actually need
 
 | if you want to… | use | why |
