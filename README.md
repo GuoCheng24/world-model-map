@@ -13,6 +13,8 @@ There are plenty of awesome-lists for world models. This is not one. A link and 
 
 So this map records something different: **the limitations the authors wrote down themselves**. That information is real, load-bearing, and almost impossible to find — it sits in section 4.3, or an appendix, or a single sentence in the discussion.
 
+<sub>If this saved you a few hours of reading, a ⭐ makes it easier for the next person to find — <a href="https://github.com/GuoCheng24/world-model-map">github.com/GuoCheng24/world-model-map</a>. Corrections are worth more than stars, though; see <a href="#contributing">Contributing</a>.</sub>
+
 ---
 
 ## Evidence levels
@@ -239,15 +241,81 @@ exchangeability, and **successive rollout steps are not exchangeable** — step
 `k+1` is computed from step `k`'s output. Adapting it is a real problem, not
 a matter of applying the standard recipe.
 
+### One recursion underneath all of it
+
+Before the individual methods, the thing they share. Write `e_k` for the error of
+the rollout at step `k`. Feeding a prediction back in gives
+
+```
+e_{k+1}  ≤  L · e_k  +  δ                 ⟹      e_k = δ · (L^k − 1) / (L − 1)
+```
+
+`L` is **multiplicative** — how much the latent map stretches error already
+present. `δ` is **additive** — the new error each step injects. Everything on this
+page acts on one of those two, projects the state, or measures `e_k` without
+touching either.
+
+<p align="center">
+  <img src="docs/recursion.png" width="100%">
+</p>
+
+The split is not gradual. Holding `δ = 0.01` and moving only `L`, at horizon 60:
+
+| `L` | `e_60` | |
+|---|---|---|
+| 0.90 | 0.0998 | saturates at `δ/(1−L) = 0.1` |
+| 1.00 | 0.60 | grows linearly, `kδ` |
+| 1.15 | 292 | exponential |
+
+A 25% change in `L` moves the bound by **4400×**. This is why V-JEPA 2 plans at
+horizon 1 and why "just roll out further" is not an engineering detail.
+
+*(The recursion is the standard error-propagation form, not a quotation; the closed
+form was checked against direct iteration to machine precision. The script is
+[`docs/recursion_figure.py`](docs/recursion_figure.py).)*
+
 ### Constraining the dynamics itself
 
-Rather than measuring the error, restrict the transition map so it cannot blow
-up. **Koopman Dreamer** 📄 (2026) puts spectral constraints on a deterministic
-latent dynamics core; **SD-GWM** 📄 (2026) constrains rollout on a graph and
-positions itself as a *verifiable substrate* rather than a better forecaster.
+Rather than measuring the error, restrict the map so it cannot blow up.
 
-Both **require retraining** — you are changing the model, not wrapping it. That
-is the practical cost line running through this whole section.
+**Koopman Dreamer** 📄 ([arXiv:2607.19719](https://arxiv.org/abs/2607.19719))
+attacks `L` directly. The latent core is built from **2-D rotation–scaling blocks
+with bounded radii** — damping, rotation and near-periodic modes, with the radius
+bound as the spectral constraint. Action enters through linear and low-rank
+bilinear terms. The paper derives a multi-step rollout-error bound that
+**separates the amplification** (spectral backbone, bilinear interaction) **from
+the additive terms** (stochastic-state mismatch, modelling residual) — which is
+the `L` / `δ` split above, stated by the authors for their own model.
+
+**SD-GWM** 📄 ([arXiv:2608.08689](https://arxiv.org/abs/2608.08689)) does
+something structurally different: it neither shrinks `L` nor `δ`, it **projects**.
+Nodes declare self-dynamics `S`, edges declare graph-coupled dynamics `N`, both as
+*fixed-form* assets — rules, ODEs, existing solvers — with only authorized
+parameters calibrated. A bounded residual `R` absorbs what is left, and a global
+projection maps the state back onto the feasible set at each step. The authors are
+unusually direct about what that buys: the projection **enforces constraints
+without guaranteeing accuracy gains**, and they position the model as a
+*verifiable substrate rather than a better forecaster*. Their reported numbers fit
+that framing — on a 254-day extreme-flood shift, persistence and neural baselines
+degrade to 892–3007 cfs RMSE while SD-GWM holds at 108, but the bounded residual
+only cuts RMSE meaningfully when the backbone is biased.
+
+Both **require retraining**. You are changing the model, not wrapping it — the
+cost line running through this whole section.
+
+### The gap the table makes visible
+
+Read the figure's table by column rather than by row. Everything that
+**constrains** the recursion — bounded spectral radii, feasibility projection,
+a tighter `δ` — hands you no statement about a *particular* rollout you are about
+to trust. Everything that **measures** it — ensemble spread, and conformal
+prediction if it worked here — leaves the recursion exactly as it was.
+
+Nothing currently does both. That is not a gap anyone has hidden; it falls out of
+how the two literatures are built, and it is the most concrete opening on this
+page. The obstacle on the certification side is stated in the rollout section
+above and is real: split conformal needs exchangeability, and step `k+1` is
+computed from step `k`.
 
 ### Where the action frame lives — the thinnest area
 
@@ -284,8 +352,8 @@ The oldest and most-cited line, and still open.
 
 ### 2. Constraining the latent dynamics
 
-- **Koopman Dreamer** 📄 (2026, arXiv:2607.19719) — spectrally constrained deterministic latent dynamics, aimed at stable imagination.
-- **SD-GWM** 📄 (2026, arXiv:2608.0868) — structural dynamics graph world model with constrained rollout and calibration; explicitly positioned as a *verifiable substrate* rather than a better forecaster.
+- **Koopman Dreamer** 📄 (2026, [arXiv:2607.19719](https://arxiv.org/abs/2607.19719)) — *Spectrally Constrained Latent Dynamics for Stable World-Model Imagination*, Li, Zhang, Xie et al. The backbone is built from **2-D rotation–scaling blocks with bounded radii**, which is how the spectrum is constrained. They derive a multi-step rollout-error bound that **separates the multiplicative amplification** (spectral backbone + bilinear action terms) **from the additive terms** (stochastic-state mismatch, modelling residual) — the two knobs in the recursion above.
+- **SD-GWM** 📄 (2026, [arXiv:2608.08689](https://arxiv.org/abs/2608.08689)) — *A Structural Dynamics Graph World Model*, Wang, Chen, Yang & Liu. Nodes declare self-dynamics `S`, edges declare graph-coupled dynamics `N`, both **fixed-form** mechanism assets (rules, ODEs, solvers) with only *authorized* parameters calibrated; an optional **bounded residual** `R` concentrates learnability, and a **global projection** maps states onto feasibility. The authors are explicit that the projection enforces constraints *without guaranteeing accuracy gains*, and position the model as a **verifiable substrate rather than a better forecaster**.
 
 *Requires retraining.* Adopting either means changing the training objective, not adding a module.
 
@@ -321,6 +389,13 @@ Corrections are welcome, especially:
 - a repository whose status has changed.
 
 Please cite the section or page. **Claims sourced from an abstract will be marked 📄**, whoever submits them.
+
+A correction that removes a wrong claim is the most useful thing you can send. One
+example of what that looks like: this file previously carried `arXiv:2608.0868` for
+SD-GWM, which is one digit short and resolves to nothing — the real id is
+`2608.08689`. Every arXiv id here has since been re-checked with
+[`scholarcheck`](https://github.com/GuoCheng24/scholarcheck) and all ten resolve to
+the record they claim.
 
 ## License
 
