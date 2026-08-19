@@ -414,6 +414,15 @@ SD-GWM, which is one digit short and resolves to nothing — the real id is
 [`scholarcheck`](https://github.com/GuoCheng24/scholarcheck) and all ten resolve to
 the record they claim.
 
+## Other things from the same desk
+
+Written while trying to get papers out, so they tend to be useful at the same points in that process:
+
+- [scholarcheck](https://github.com/GuoCheng24/scholarcheck) — verify that a citation actually exists, and audit a whole .bib in CI
+- [docxaudit](https://github.com/GuoCheng24/docxaudit) — find what your converter silently dropped from a .docx
+- [sciglyph](https://github.com/GuoCheng24/sciglyph) — draw publication figures as code, in pure matplotlib
+- [kakeya-conjecture-lab](https://github.com/GuoCheng24/kakeya-conjecture-lab) — an interactive lab for the Kakeya conjecture, with a box-counting meter
+
 ## License
 
 CC BY 4.0 — reuse with attribution.
