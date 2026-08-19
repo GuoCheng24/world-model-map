@@ -6,11 +6,12 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.transforms import Bbox
 from matplotlib.patches import FancyBboxPatch, Rectangle, Ellipse
 from sciglyph import set_canvas, RC, report
 
 plt.rcParams.update(RC)
-FW, FH = 12.2, 4.15
+FW, FH = 12.2, 3.72
 fig = plt.figure(figsize=(FW, FH), dpi=200)
 ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
 set_canvas(fig)
@@ -117,13 +118,15 @@ ax.plot([.692, .940], [.408, .408], color="#dcdcdc", lw=.9, zorder=5)
 ax.text(.692, .372, "open: what conditions on the observation\nmake the frame identifiable at all?",
         fontsize=6.8, ha="left", va="center", color=BLUE, zorder=20)
 
-ax.text(.5, .120, "an action is only meaningful relative to a frame — if the frame is ambiguous, "
+ax.text(.5, .262, "an action is only meaningful relative to a frame — if the frame is ambiguous, "
                   "the world model is being asked an ill-posed question",
         fontsize=7.4, ha="center", color=INK, zorder=20)
-ax.text(.5, .052, "limitation quoted from V-JEPA 2, arXiv:2506.09985 §4.3; the scenes are schematic",
+ax.text(.5, .200, "limitation quoted from V-JEPA 2, arXiv:2506.09985 §4.3; the scenes are schematic",
         fontsize=6.6, ha="center", color=MUTE, style="italic", zorder=20)
 
 report(fig, ax)
+# 内容(含最下面那行脚注)只占到轴坐标 y≈.17 以上。bbox_inches="tight" 裁不掉轴*内部*的空白
+# (轴本身铺满整幅), 所以直接给出以英寸计的裁剪框, 原点在左下角。
 fig.savefig(Path(__file__).with_name("action-frame.png"),
-            dpi=200, bbox_inches="tight", facecolor="white")
+            dpi=200, bbox_inches=Bbox([[0, FH * 0.170], [FW, FH]]), facecolor="white")
 print("saved")

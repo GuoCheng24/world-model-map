@@ -5,14 +5,14 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, Rectangle, Circle
+from matplotlib.patches import FancyBboxPatch, Rectangle, Circle, Ellipse
 from sciglyph import set_canvas, RC, report
 from sciglyph.arch import flow, cuboid, BLUE
 
 plt.rcParams.update(RC)
 fig = plt.figure(figsize=(12.4, 5.6), dpi=200)
 ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-set_canvas(fig)
+AR = set_canvas(fig)
 INK, MUTE = "#1a1a1a", "#6b6b6b"
 RED, GREEN, AMBER, PURPLE = "#c0392b", "#2e7d4f", "#b8860b", "#7a5aa8"
 
@@ -50,73 +50,72 @@ ax.plot([PX0 + PW / 5] * 2, [PY - .034, PY + .075], color=GREEN, lw=1.3,
 ax.text(PX0 + PW / 5 + .008, PY + .062, "V-JEPA 2 plans here (horizon 1)",
         fontsize=6.7, color=GREEN, zorder=20)
 
-# ---------- three attempts ----------
-Y = .500
-cards = [
-    (.055, "MBPO (2019)", RED, "a bound that exists",
-     r"$\eta[\pi]\;\geq\;\hat{\eta}[\pi]-C(\epsilon_m,\epsilon_\pi)$",
-     "$\\epsilon_m$ bounds the TV-distance between\ntrue and model transitions",
-     "but $\\epsilon_m$ is not observable — you must\nestimate the very thing being bounded"),
-    (.375, "ensembles (2021)", AMBER, "a signal that works",
-     "spread of an ensemble\nof learned dynamics",
-     "cheap, and it does detect trouble\nin practice",
-     "spread is not coverage; nothing forces\nit to be calibrated"),
-    (.695, "conformal", GREEN, "the guarantee you want",
-     "distribution-free, finite-sample\ncoverage at a chosen level",
-     "needs no assumption on the model\nor the error distribution",
-     "but split conformal needs exchangeability —\nand rollout steps are not exchangeable"),
-]
-for x, name, col, tag, formula, good, catch in cards:
-    box(x, Y - .215, .250, .330, "#fbfcfd", col, 1.3)
-    ax.text(x + .014, Y + .082, name, fontsize=8.4, ha="left", weight="bold",
-            color=col, zorder=20)
-    ax.text(x + .014, Y + .046, tag, fontsize=6.6, ha="left", color=MUTE,
-            style="italic", zorder=20)
-    ax.add_patch(Rectangle((x + .014, Y - .020), .222, .054, fc="#f2f4f7",
-                           ec="none", zorder=5))
-    ax.text(x + .125, Y + .007, formula, fontsize=7.0, ha="center", va="center",
-            color=INK, zorder=20)
-    ax.text(x + .014, Y - .062, good, fontsize=6.4, ha="left", va="center",
-            color=INK, zorder=20)
-    ax.plot([x + .014, x + .236], [Y - .102, Y - .102], color="#e0e0e0", lw=.9, zorder=5)
-    ax.text(x + .014, Y - .152, catch, fontsize=6.4, ha="left", va="center",
-            color=col, zorder=20)
+# ============================================================
+# Lower half: why the standard conformal recipe does not reach this.
+# Drawn rather than described - the obstacle is a property of the
+# dependency structure, so the dependency structure is what is shown.
+# ============================================================
+ax.text(.055, .560, "the obstacle, drawn", fontsize=8.4, weight="bold", color=INK, zorder=20)
+ax.text(.055, .528,
+        "split conformal needs exchangeability: any reordering of the points must leave the joint distribution unchanged.",
+        fontsize=7.2, color=MUTE, zorder=20)
 
-# ---------- bottom: why exchangeability fails ----------
-BY = .175
-box(.055, BY - .105, .560, .175, "#f7f4fb", PURPLE, 1.3)
-ax.text(.072, BY + .042, "why the standard recipe does not apply",
-        fontsize=7.8, ha="left", weight="bold", color=PURPLE, zorder=20)
-xs = [.110, .200, .290, .380]
-for i, x in enumerate(xs):
-    _r = .0165
-    ax.add_patch(plt.matplotlib.patches.Ellipse(
-        (x, BY - .022), 2 * _r / (12.4 / 5.6), 2 * _r,
-        fc="#e8e2f2", ec=PURPLE, lw=1.1, zorder=6))
-    ax.text(x, BY - .022, f"$s_{i+1}$", fontsize=6.6, ha="center", va="center",
-            color=INK, zorder=8)
-    if i:
-        ax.annotate("", xy=(x - .0090, BY - .022), xytext=(xs[i-1] + .0090, BY - .022),
-                    arrowprops=dict(arrowstyle="-|>", color=PURPLE, lw=1.4,
-                                    mutation_scale=11), zorder=9)
-ax.text(.420, BY - .022, "each score is computed from\nthe previous step's output",
-        fontsize=6.6, va="center", color=INK, zorder=20)
-ax.text(.072, BY - .078, "exchangeability asks that any ordering be equally likely. Here the order "
-                         "is the causal structure.",
-        fontsize=6.6, ha="left", color=PURPLE, zorder=20)
+def dot(x, y, lab, c, r=.0155, fs=7.6, z=10):
+    ax.add_patch(Ellipse((x, y), 2 * r / AR, 2 * r, fc="white", ec=c, lw=1.2, zorder=z))
+    ax.text(x, y, lab, fontsize=fs, ha="center", va="center", color=c, zorder=z + 1)
 
-box(.640, BY - .105, .305, .175, "#eef6f1", GREEN, 1.3)
-ax.text(.657, BY + .042, "what would settle it", fontsize=7.8, ha="left",
-        weight="bold", color=GREEN, zorder=20)
-ax.text(.657, BY - .030, "a finite-sample statement about a\nspecific rollout at a specific horizon,\n"
-                         "with no assumption on the model.",
-        fontsize=6.6, ha="left", va="center", color=INK, zorder=20)
-ax.text(.657, BY - .086, "open — this is not applying a recipe.",
-        fontsize=6.5, ha="left", color=GREEN, style="italic", zorder=20)
+# ---- left: i.i.d. calibration set, a swap changes nothing ----
+LX, LY = .105, .355
+ax.text(LX - .040, LY + .128, "calibration set   (i.i.d. draws)",
+        fontsize=7.4, weight="bold", color=GREEN, zorder=20)
+xs = [LX + k * .086 for k in range(4)]
+for k, x in enumerate(xs):
+    dot(x, LY, "$s_%d$" % (k + 1), GREEN)
+ax.annotate("", xy=(xs[3], LY + .030), xytext=(xs[1], LY + .030),
+            arrowprops=dict(arrowstyle="<|-|>", color=GREEN, lw=1.0,
+                            connectionstyle="arc3,rad=-0.5"), zorder=8)
+ax.text((xs[1] + xs[3]) / 2, LY + .092, "swap", fontsize=6.8, ha="center", color=GREEN, zorder=20)
+ax.text(LX - .040, LY - .058,
+        "no arrows to break. the points do not depend on each\n"
+        "other, so every ordering is equally likely and the\n"
+        "calibration quantile is valid.",
+        fontsize=7.0, va="top", color=MUTE, zorder=20, linespacing=1.75)
 
-ax.text(.5, .034, "MBPO bound quoted from arXiv:1906.08253 Theorem 4.1; ensemble approach "
-                  "from arXiv:2105.05716; the error cone is illustrative",
-        fontsize=6.6, ha="center", color=MUTE, style="italic", zorder=20)
+# ---- right: a rollout, where the same swap is illegal ----
+RX, RY = .590, .355
+ax.text(RX - .040, RY + .128, "rollout   (each step made from the last)",
+        fontsize=7.4, weight="bold", color=RED, zorder=20)
+xs2 = [RX + k * .086 for k in range(4)]
+for k, x in enumerate(xs2):
+    dot(x, RY, "$s_%d$" % (k + 1), RED)
+for k in range(3):
+    flow(ax, (xs2[k] + .018, RY), (xs2[k + 1] - .018, RY), c=RED, lw=1.1, ms=8, z=9)
+ax.annotate("", xy=(xs2[3], RY + .030), xytext=(xs2[1], RY + .030),
+            arrowprops=dict(arrowstyle="<|-|>", color=RED, lw=1.0,
+                            connectionstyle="arc3,rad=-0.5"), zorder=8)
+mx = (xs2[1] + xs2[3]) / 2
+ax.text(mx, RY + .092, "same swap", fontsize=6.8, ha="center", color=RED, zorder=20)
+ax.plot([mx - .013, mx + .013], [RY + .050, RY + .076], color=RED, lw=1.9, zorder=14)
+ax.plot([mx - .013, mx + .013], [RY + .076, RY + .050], color=RED, lw=1.9, zorder=14)
+ax.text(RX - .040, RY - .058,
+        "the arrows are the joint distribution. reorder these and\n"
+        "you have written down a different process, so the\n"
+        "exchangeability argument never starts.",
+        fontsize=7.0, va="top", color=MUTE, zorder=20, linespacing=1.75)
+
+# ---- what a usable result would have to be ----
+box(.055, .095, .890, .088, "#f3f8f4", GREEN, 1.2)
+ax.text(.072, .146, "so the way through is not split conformal applied to rollouts",
+        fontsize=7.8, weight="bold", color="#1f5c39", zorder=20)
+ax.text(.072, .116,
+        "it has to survive the dependence itself: a finite-sample bound at horizon k, for a specific rollout, "
+        "with no assumption on the model. open problem, not a recipe.",
+        fontsize=7.2, color="#2e7d4f", zorder=20)
+
+ax.text(.5, .040,
+        "MBPO bound: arXiv:1906.08253 Thm 4.1   |   ensemble approach: arXiv:2105.05716   |   "
+        "the error cone is illustrative; the dependency graphs are definitions",
+        fontsize=6.5, ha="center", color=MUTE, style="italic", zorder=20)
 
 report(fig, ax)
 fig.savefig(Path(__file__).with_name("rollout.png"),
