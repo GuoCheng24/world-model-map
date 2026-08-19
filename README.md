@@ -210,6 +210,10 @@ Autoregressive prediction compounds: feed a prediction back in, and its error
 becomes part of the next input. Every model above suffers from it, which is why
 V-JEPA 2's own planning runs at horizon 1.
 
+<p align="center">
+  <img src="docs/rollout.png" width="100%">
+</p>
+
 **MBPO** 📖 ([arXiv:1906.08253](https://arxiv.org/abs/1906.08253)) gives the
 reference bound. With `ε_m` bounding the expected TV-distance between true and
 model transitions and `ε_π` bounding policy divergence,
@@ -251,6 +255,10 @@ V-JEPA 2-AC takes an end-effector Cartesian action and predicts the next
 representation, **without camera calibration**. So the model must infer the
 action coordinate frame from monocular pixels — and when the robot base is out
 of frame, the authors state the inference problem **is not well defined**.
+
+<p align="center">
+  <img src="docs/action-frame.png" width="100%">
+</p>
 
 This is a geometry question before it is a learning question: *under what
 conditions on the observation is the action frame identifiable at all?* If it is
