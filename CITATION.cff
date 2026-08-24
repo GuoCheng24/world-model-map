@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If this was useful in your work, please cite it."
+title: "world-model-map: open-source world models and where their authors say they break"
+abstract: "A researcher's map of open-source world models, recording the limitations the authors stated themselves rather than summarising abstracts, together with a decision chart of what adopting each one costs."
+type: software
+authors:
+  - family-names: Cheng
+    given-names: Guo
+    affiliation: "University of Chinese Academy of Sciences"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # fill in before the first Zenodo release
+repository-code: "https://github.com/GuoCheng24/world-model-map"
+license: CC-BY-4.0
+version: 1.0.0
+keywords:
+  - "world models"
+  - "JEPA"
+  - "model-based RL"
+  - "research map"
+  - "robotics"

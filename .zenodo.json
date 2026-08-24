@@ -1,0 +1,20 @@
+{
+  "title": "world-model-map: open-source world models and where their authors say they break",
+  "description": "A researcher's map of open-source world models, recording the limitations the authors stated themselves rather than summarising abstracts, together with a decision chart of what adopting each one costs.",
+  "upload_type": "software",
+  "license": "cc-by-4.0",
+  "creators": [
+    {
+      "name": "Cheng, Guo",
+      "affiliation": "University of Chinese Academy of Sciences"
+    }
+  ],
+  "keywords": [
+    "world models",
+    "JEPA",
+    "model-based RL",
+    "research map",
+    "robotics"
+  ],
+  "access_right": "open"
+}
