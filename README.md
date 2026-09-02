@@ -363,7 +363,7 @@ The oldest and most-cited line, and still open.
 
 - **MBPO** 📖 — [arXiv:1906.08253](https://arxiv.org/abs/1906.08253). Theorem 4.1 bounds true returns by model returns minus `C(ε_m, ε_π)`, where `ε_m` bounds the TV-distance between true and model transitions. The structure is sound; the catch is that **`ε_m` is not observable** and has to be estimated before the bound can be used.
 - **Acting upon Imagination** 📖 — [arXiv:2105.05716](https://arxiv.org/abs/2105.05716). Uses **ensemble variance** to decide when to re-plan. Heuristic; no coverage guarantee.
-- **Metric Non-Collapse in Learned World Models for Control** 📄 (2026) — advertises approximation theory and *finite-sample geometric guarantees*. Not yet read in full.
+- **Finite-Sample Metric Non-Collapse for Geometrically Supervised Latent World Models in Control** 📄 — [arXiv:2608.07265](https://arxiv.org/abs/2608.07265) (Bensoussan, Phung, Tran, 2026-08) — advertises approximation theory and *finite-sample geometric guarantees*. Not yet read in full.
 
 *Open:* none of the above gives a **distribution-free, finite-sample** statement about a specific rollout at a specific horizon. Conformal methods are the obvious candidate; the non-trivial part is that rollout steps are **not exchangeable**, so textbook split conformal does not apply unmodified.
 
@@ -378,9 +378,9 @@ The oldest and most-cited line, and still open.
 
 The failure mode JEPA-style objectives are built to avoid, and where the theory is currently moving fastest.
 
-- **A Minimal Model of Representation Collapse: Frustration, Stop-Gradient, and Dynamics** 📄 (2026)
-- **Rectified LpJEPA: sparse and maximum-entropy representations** 📄 (2026)
-- **Gaussian Joint Embeddings for SSL** 📄 (2026)
+- **A Minimal Model of Representation Collapse: Frustration, Stop-Gradient, and Dynamics** 📄 — [arXiv:2604.09979](https://arxiv.org/abs/2604.09979) (Yao, Li, Liu, 2026-04)
+- **Rectified LpJEPA: Joint-Embedding Predictive Architectures with Sparse and Maximum-Entropy Representations** 📄 — [arXiv:2602.01456](https://arxiv.org/abs/2602.01456) (Kuang, Dagade, Rudner, Balestriero, LeCun; ICML 2026)
+- **Gaussian Joint Embeddings For Self-Supervised Representation Learning** 📄 — [arXiv:2603.26799](https://arxiv.org/abs/2603.26799) (Huang, 2026-03)
 - **SimSiam** 📖 — [arXiv:2011.10566](https://arxiv.org/abs/2011.10566), the reference point for why stop-gradient alone prevents collapse.
 
 ### 4. Geometry of the action–latent map
