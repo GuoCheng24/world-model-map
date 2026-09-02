@@ -162,6 +162,13 @@ ax.text(.5, gy - .092,
         fontsize=6.6, ha="center", va="top", color=MUTE, style="italic", zorder=30)
 
 report(fig, ax)
+# The README quotes the ratio between the L=0.90 and L=1.15 bounds; derive it here
+# so the prose cannot drift from the recursion this figure draws.
+def _bound(L, k=60, dd=0.01):
+    return dd * k if L == 1 else dd * (L ** k - 1) / (L - 1)
+print(f"README check: L 0.90 -> {_bound(0.90):.4f}, L 1.15 -> {_bound(1.15):.1f}, "
+      f"ratio {_bound(1.15) / _bound(0.90):,.0f}x, L change {(1.15 - 0.90) / 0.90 * 100:.0f}%")
+
 out = Path(__file__).parent / "recursion.png"
 fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
 print("saved", out)

@@ -1,0 +1,36 @@
+name: check
+
+# A curated map has two failure modes software CI usually ignores: links rot,
+# and entries quietly lose their citation. Both are cheap to test, so they are
+# tested here rather than trusted.
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays: link rot is slow, weekly is enough
+  workflow_dispatch:
+
+jobs:
+  citations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: every cited entry carries an identifier, and the numbers match the recursion
+        run: python docs/check_map.py
+
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: no dead links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress --max-retries 3 --timeout 30
+            --accept 200,206,429
+            --exclude-path docs
+            README.md
+          fail: true

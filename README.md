@@ -284,7 +284,7 @@ The split is not gradual. Holding `δ = 0.01` and moving only `L`, at horizon 60
 | 1.00 | 0.60 | grows linearly, `kδ` |
 | 1.15 | 292 | exponential |
 
-A 25% change in `L` moves the bound by **4400×**. This is why V-JEPA 2 plans at
+A 28% change in `L` moves the bound by **2,927×** (the 4,384× is `1.15^60` itself, the amplification, not the ratio of the two bounds). This is why V-JEPA 2 plans at
 horizon 1 and why "just roll out further" is not an engineering detail.
 
 *(The recursion is the standard error-propagation form, not a quotation; the closed
