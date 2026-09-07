@@ -1,5 +1,7 @@
 # world-model-map
 
+[![test](https://github.com/GuoCheng24/world-model-map/actions/workflows/check.yml/badge.svg)](https://github.com/GuoCheng24/world-model-map/actions/workflows/check.yml)
+
 **A researcher's map of open-source world models — what exists, what each line of work actually claims, and where its authors say it breaks.**
 
 <p align="center">
