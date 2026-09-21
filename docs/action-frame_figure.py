@@ -125,8 +125,9 @@ ax.text(.5, .200, "limitation quoted from V-JEPA 2, arXiv:2506.09985 §4.3; the 
         fontsize=6.6, ha="center", color=MUTE, style="italic", zorder=20)
 
 report(fig, ax)
-# 内容(含最下面那行脚注)只占到轴坐标 y≈.17 以上。bbox_inches="tight" 裁不掉轴*内部*的空白
-# (轴本身铺满整幅), 所以直接给出以英寸计的裁剪框, 原点在左下角。
+# Everything drawn, the footnote line included, sits above axes y = .17. bbox_inches="tight"
+# cannot trim whitespace *inside* the axes, and the axes fill the whole figure, so the crop box
+# is given directly in inches with the origin at the bottom left.
 fig.savefig(Path(__file__).with_name("action-frame.png"),
             dpi=200, bbox_inches=Bbox([[0, FH * 0.170], [FW, FH]]), facecolor="white")
 print("saved")

@@ -42,7 +42,7 @@ ax.text(.066, ay + .035, r"$e_k$", fontsize=9.6, ha="center", va="center", zorde
 flow(ax, (.100, ay + .035), (.150, ay + .035), c=INK, lw=1.1)
 ax.text(.125, ay + .052, r"$\times\, L$", fontsize=8.6, ha="center", color=RED, zorder=30)
 
-# 用库里的 op_circle: 直接 Circle 在非方画布上会压成椭圆
+# op_circle from the library: a bare Circle is squashed into an ellipse on a non-square canvas
 op_circle(ax, .171, ay + .035, sym="+", r=.013, fs=8.5, z=8)
 
 ax.annotate("", xy=(.171, ay + .020), xytext=(.171, ay - .052),
@@ -54,8 +54,9 @@ box(.236, ay, .074, .070, "#eef2f6", BLUE, 1.2)
 ax.text(.273, ay + .035, r"$e_{k+1}$", fontsize=9.6, ha="center", va="center", zorder=10)
 
 # feedback: next step's input is this step's output.
-# 走方框上方一条明确的折线, 并置于方框之上 —— 之前用 arc3 且 zorder 低于方框,
-# 弧被方框盖住, 只露出两端, 看着像两段碎线。
+# An explicit polyline routed above the boxes and drawn on top of them. The earlier version
+# used arc3 at a zorder below the boxes, which hid the middle of the arc and left the two ends
+# showing as a pair of stray fragments.
 fby = ay + .112
 ax.plot([.273, .273, .066, .066], [ay + .070, fby, fby, ay + .074],
         color=MUTE, lw=.9, zorder=12, solid_joinstyle="round")
@@ -85,8 +86,8 @@ for L, c in Ls:
     e = d * (L ** ks - 1) / (L - 1) if L != 1 else d * ks
     ax.plot(X(ks), Y(e), color=c, lw=1.5 if L != 1 else 1.7, zorder=6,
             alpha=.95 if L in (0.90, 1.00, 1.15) else .55)
-    # L=0.85 与 0.9 的终值 (.0667 / .0998) 在对数轴上几乎同高, 末端标签会叠。
-    # 把下面那条的标签沿曲线左移并下沉。
+    # L = 0.85 and 0.9 end at .0667 and .0998, nearly the same height on a log axis, so their
+    # end labels collide. Move the lower one back along its curve and drop it.
     lab = f"L = {L:g}"
     if L == 0.85:
         ax.text(X(K) - .120, Y(e[-1]) - .026, lab, fontsize=7.2, va="center", color=c, zorder=30)
@@ -140,7 +141,8 @@ for i, (name, cite, marks, note, col) in enumerate(rows):
     for j, m in enumerate(marks):
         cx = cols[j][1]
         if m == "yes":
-            # 用库里的 circle(): Circle(r/AR) 只是把圆缩小, 并没有校正长宽比, 画出来仍是椭圆
+            # circle() from the library: Circle(r/AR) only shrinks it, it does not correct the
+            # aspect ratio, so it still draws as an ellipse
             circle(ax, (cx, y - .020), .0092, fc=col, ec="none", zorder=6)
         else:
             ax.plot([cx - .008, cx + .008], [y - .020] * 2, color=RULE, lw=1.2, zorder=6)
