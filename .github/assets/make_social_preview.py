@@ -16,7 +16,7 @@ README = (ROOT / "README.md").read_text(encoding="utf-8")
 n_repos = len(re.findall(r"^\| \[", README, re.M))
 
 # each pair is a system and the limitation its own authors state, sourced in the section named
-STATED = [("V-JEPA 2-AC", "planning results are run at horizon 1"),
+STATED = [("V-JEPA 2-AC", "planning is run at horizon 1"),
           ("DINO-WM", "no reward signal, no task transfer"),
           ("TD-MPC2", "needs retraining per embodiment"),
           ("DreamerV3", "one hyperparameter set, at a cost")]
@@ -26,15 +26,17 @@ for name, _ in STATED:
 
 
 def chart(ax, accent):
+    import matplotlib.pyplot as plt
     ax.text(0.78, 3.42, f"{n_repos} systems, each with what its authors admit",
             fontsize=34, color="#55585c", family=SANS)
     y = 2.72
     for name, limit in STATED:
-        ax.text(0.80, y, name, fontsize=34, fontweight="bold", color="#17181a",
+        ax.add_patch(plt.Rectangle((0.80, y - 0.17), 0.30, 0.34, color=accent, zorder=3))
+        ax.text(1.32, y, name, fontsize=34, fontweight="bold", color="#17181a",
                 family=SANS, va="center")
-        ax.text(3.95, y, limit, fontsize=34, color="#55585c", family=SANS, va="center")
+        ax.text(4.40, y, limit, fontsize=34, color="#55585c", family=SANS, va="center")
         y -= 0.60
-    ax.plot([0.80, 3.72], [2.72 + 0.34, 2.72 + 0.34], color="#e2ded8", lw=0)
+
 
 
 out = card(
